@@ -1,30 +1,26 @@
-# Orizuru Transport Redis.
+# Orizuru Transport Kafka.
 
-[![Build Status](https://travis-ci.org/financialforcedev/orizuru-transport-redis.svg?branch=master)](https://travis-ci.org/financialforcedev/orizuru-transport-redis)
-[![NSP Status](https://nodesecurity.io/orgs/ffres/projects/a598bbf3-fdde-4ee0-9b4a-17d6e579512a/badge)](https://nodesecurity.io/orgs/ffres/projects/a598bbf3-fdde-4ee0-9b4a-17d6e579512a)
-
-Orizuru Transport Redis is a transport library for the [Orizuru](https://www.npmjs.com/package/@financialforcedev/orizuru) framework.
+Orizuru Transport Kafka is a transport library for the [Orizuru](https://www.npmjs.com/package/@financialforcedev/orizuru) framework.
 
 ## Install
 
 ```
-$ npm install @financialforcedev/orizuru-transport-redis
+$ npm install @financialforcedev/orizuru-transport-kafka
 ```
 
 ## Usage
 
-Use this dependency to specify the transport layer that ```@financialforcedev/orizuru``` uses as Redis.
+Use this dependency to specify the transport layer that ```@financialforcedev/orizuru``` uses as Kafka.
 
 	const
 		// get classes from orizuru
 		{ Server, Handler, Publisher } = require('@financialforcedev/orizuru'),
 
 		// get the transport
-		transport = require('@financialforcedev/orizuru-transport-redis'),
+		transport = require('@financialforcedev/orizuru-transport-kafka'),
 
 		// configure the transport
 		transportConfig = {
-			url: 'redis://localhost:6379'
 		};
 
 	new Server({ transport, transportConfig }))...
@@ -34,4 +30,4 @@ Use this dependency to specify the transport layer that ```@financialforcedev/or
 
 ## API Docs
 
-Click to view [JSDoc API documentation](http://htmlpreview.github.io/?https://github.com/financialforcedev/orizuru-transport-redis/blob/master/doc/index.html).
+Click to view [JSDoc API documentation](http://htmlpreview.github.io/?https://github.com/financialforcedev/orizuru-transport-kafka/blob/master/doc/index.html).

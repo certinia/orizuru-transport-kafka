@@ -30,7 +30,7 @@
  * Returns the publish and subscribe methods.
  * 
  * These define the API for a transport layer.
- * In this case, the transport uses redis pub/sub.
+ * In this case, the transport uses Kafka.
  * 
  * @module index
  */
@@ -53,7 +53,6 @@ module.exports = {
 	 * @example
 	 * let buffer = ...,
 	 * 	config = {
-	 * 		url: 'redis://localhost:6379'
 	 * 	}
 	 * index.publish({ eventName: 'test', buffer, config });
 	 * 
@@ -77,7 +76,6 @@ module.exports = {
 	 * 		console.log(buffer);
 	 * 	},
 	 * 	config = {
-	 * 		url: 'redis://localhost:6379'
 	 * 	}
 	 * index.subscribe({ eventName: 'test', handler, config });
 	 * 
