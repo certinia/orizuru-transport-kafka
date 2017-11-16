@@ -1,0 +1,61 @@
+{
+  "name": "@financialforcedev/orizuru-transport-kafka",
+  "version": "3.0.3",
+  "description": "Kafka transport layer for the orizuru package",
+  "main": "src/lib/index.js",
+  "scripts": {
+    "doc": "jsdoc src/lib -r -d doc  --readme readme.md",
+    "pretest": "eslint src",
+    "test": "nyc --exclude src/example mocha --recursive src/spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/financialforcedev/orizuru-transport-kafka"
+  },
+  "keywords": [
+    "kafka",
+    "publish",
+    "subscribe",
+    "heroku",
+    "worker",
+    "dyno",
+    "orizuru"
+  ],
+  "author": "financialforce",
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "lodash": "4.17.4",
+    "no-kafka": "^3.2.8"
+  },
+  "devDependencies": {
+    "@financialforcedev/eslint-config": "^3.0.1",
+    "app-root-path": "2.0.1",
+    "chai": "3.5.0",
+    "chai-as-promised": "7.1.1",
+    "jsdoc": "3.5.5",
+    "mocha": "3.5.3",
+    "nyc": "11.2.1",
+    "proxyquire": "1.8.0",
+    "sinon": "3.3.0",
+    "sinon-chai": "2.13.0"
+  },
+  "nyc": {
+    "check-coverage": true,
+    "per-file": true,
+    "lines": 100,
+    "statements": 100,
+    "functions": 100,
+    "branches": 100,
+    "include": [
+      "src"
+    ],
+    "reporter": [
+      "lcov",
+      "html",
+      "text",
+      "text-summary"
+    ],
+    "cache": true,
+    "all": true
+  }
+}
