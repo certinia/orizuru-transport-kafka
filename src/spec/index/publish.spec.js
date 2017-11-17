@@ -28,11 +28,17 @@
 
 const
 	sinon = require('sinon'),
-	{ calledOnce, calledTwice, calledWith } = sinon.assert,
+	{ calledOnce, calledTwice, calledWith, notCalled } = sinon.assert,
 	proxyquire = require('proxyquire'),
 
 	sandbox = sinon.sandbox.create(),
-	restore = sandbox.restore.bind(sandbox);
+	restore = sandbox.restore.bind(sandbox),
+	chaiAsPromised = require('chai-as-promised'),
+
+	chai = require('chai'),
+	expect = chai.expect;
+
+chai.use(chaiAsPromised);
 
 describe('index/publish.js', () => {
 
@@ -73,7 +79,7 @@ describe('index/publish.js', () => {
 
 			// when
 
-			return publish.publish(input)
+			return expect(publish.publish(input)).to.be.fulfilled
 				.then(() => {
 
 					// then
@@ -107,14 +113,100 @@ describe('index/publish.js', () => {
 
 			// when
 
-			return publish.publish(input)
-				.then(() => publish.publish(input))
+			return expect(publish.publish(input)).to.be.fulfilled
+				.then(() => expect(publish.publish(input)).to.be.fulfilled)
 				.then(() => {
 
 					// then
 
 					calledOnce(mocks.kafka.Producer.prototype.init);
 					calledTwice(mocks.producer.send);
+
+				});
+
+		});
+
+		it('rejects if Publisher constructor throws an error', () => {
+
+			// given
+
+			const
+				input = {
+					eventName: 'com.ffdc.Test',
+					buffer: Buffer.from('Hello World'),
+					config: {}
+				};
+
+			mocks.kafka.Producer.throws(new Error('Constructor error'));
+
+			// when
+
+			return expect(publish.publish(input)).to.be.rejectedWith('Constructor error')
+				.then(() => {
+
+					// then
+
+					notCalled(mocks.kafka.Producer.prototype.init);
+
+				});
+
+		});
+
+		it('rejects if Publisher init rejects', () => {
+
+			// given
+
+			const
+				input = {
+					eventName: 'com.ffdc.Test',
+					buffer: Buffer.from('Hello World'),
+					config: {}
+				};
+
+			mocks.kafka.Producer.prototype.init.rejects(new Error('Init error'));
+
+			// when
+
+			return expect(publish.publish(input)).to.be.rejectedWith('Init error')
+				.then(() => {
+
+					// then
+
+					calledOnce(mocks.kafka.Producer.prototype.init);
+					notCalled(mocks.producer.send);
+
+				});
+
+		});
+
+		it('rejects if Publisher send rejects', () => {
+
+			// given
+
+			const
+				input = {
+					eventName: 'com.ffdc.Test',
+					buffer: Buffer.from('Hello World'),
+					config: {}
+				};
+
+			mocks.producer.send.rejects(new Error('Send error'));
+
+			// when
+
+			return expect(publish.publish(input)).to.be.rejectedWith('Send error')
+				.then(() => {
+
+					// then
+
+					calledOnce(mocks.kafka.Producer.prototype.init);
+					calledOnce(mocks.producer.send);
+					calledWith(mocks.producer.send, {
+						topic: input.eventName,
+						message: {
+							value: input.buffer
+						}
+					});
 
 				});
 
