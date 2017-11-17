@@ -1,5 +1,8 @@
 # Orizuru Transport Kafka.
 
+[![Build Status](https://travis-ci.org/financialforcedev/orizuru-transport-redis.svg?branch=master)](https://travis-ci.org/financialforcedev/orizuru-transport-redis)
+[![NSP Status](https://nodesecurity.io/orgs/ffres/projects/62120cff-b6b1-4eb6-a608-338d22302f65/badge)](https://nodesecurity.io/orgs/ffres/projects/62120cff-b6b1-4eb6-a608-338d22302f65)
+
 Orizuru Transport Kafka is a transport library for the [Orizuru](https://www.npmjs.com/package/@financialforcedev/orizuru) framework.
 
 ## Install
