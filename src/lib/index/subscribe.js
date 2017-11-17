@@ -29,7 +29,7 @@
 const
 	Kafka = require('no-kafka'),
 
-	handlerWrapper = (handler, consumer) => ({ messageSet, topic, partition }) => {
+	handlerWrapper = (handler, consumer) => (messageSet, topic, partition) => {
 		return messageSet.reduce((chain, record) => {
 			return chain
 				.then(() => handler(record.message.value))

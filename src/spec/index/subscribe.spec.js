@@ -184,7 +184,7 @@ describe('index/subscribe.js', () => {
 						topic = 'test',
 						partition = 0;
 
-					return expect(initArgs.handler({ messageSet, topic, partition })).to.be.fulfilled
+					return expect(initArgs.handler(messageSet, topic, partition)).to.be.fulfilled
 						.then(() => {
 
 							calledOnce(handler);
@@ -229,7 +229,7 @@ describe('index/subscribe.js', () => {
 						topic = 'test',
 						partition = 0;
 
-					return expect(initArgs.handler({ messageSet, topic, partition })).to.be.rejectedWith('Handler error')
+					return expect(initArgs.handler(messageSet, topic, partition)).to.be.rejectedWith('Handler error')
 						.then(() => {
 
 							calledOnce(handler);
@@ -269,7 +269,7 @@ describe('index/subscribe.js', () => {
 						topic = 'test',
 						partition = 0;
 
-					return expect(initArgs.handler({ messageSet, topic, partition })).to.be.rejectedWith('Handler error')
+					return expect(initArgs.handler(messageSet, topic, partition)).to.be.rejectedWith('Handler error')
 						.then(() => {
 
 							calledOnce(handler);
@@ -283,7 +283,7 @@ describe('index/subscribe.js', () => {
 
 		});
 
-		it('handler rejects if commits offsets rejects', () => {
+		it('rejects if commits offsets rejects', () => {
 
 			// given
 
@@ -311,7 +311,7 @@ describe('index/subscribe.js', () => {
 						topic = 'test',
 						partition = 0;
 
-					return expect(initArgs.handler({ messageSet, topic, partition }))
+					return expect(initArgs.handler(messageSet, topic, partition))
 						.to.be.rejectedWith('Can\'t commit');
 
 				});
