@@ -36,7 +36,8 @@ const
 			producerPromise = producers.get(config);
 
 		if (!producerPromise) {
-			producerPromise = new Kafka.Producer(config).init();
+			const producer = new Kafka.Producer(config);
+			producerPromise = producer.init().then(() => producer);
 			producers.set(config, producerPromise);
 		}
 

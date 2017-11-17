@@ -51,10 +51,8 @@ describe('index/publish.js', () => {
 			mocks.kafka = {
 				Producer: sandbox.stub()
 			};
-			mocks.producer = {
-				send: sandbox.stub()
-			};
-			mocks.kafka.Producer.prototype.init = sandbox.stub().resolves(mocks.producer);
+			mocks.kafka.Producer.prototype.send = sandbox.stub().resolves();
+			mocks.kafka.Producer.prototype.init = sandbox.stub().resolves();
 
 			publish = proxyquire('../../lib/index/publish', {
 				'no-kafka': mocks.kafka
@@ -75,7 +73,7 @@ describe('index/publish.js', () => {
 					config: {}
 				};
 
-			mocks.producer.send.resolves(result);
+			mocks.kafka.Producer.prototype.send.resolves(result);
 
 			// when
 
@@ -85,8 +83,8 @@ describe('index/publish.js', () => {
 					// then
 
 					calledOnce(mocks.kafka.Producer.prototype.init);
-					calledOnce(mocks.producer.send);
-					calledWith(mocks.producer.send, {
+					calledOnce(mocks.kafka.Producer.prototype.send);
+					calledWith(mocks.kafka.Producer.prototype.send, {
 						topic: input.eventName,
 						message: {
 							value: input.buffer
@@ -109,7 +107,7 @@ describe('index/publish.js', () => {
 					config: {}
 				};
 
-			mocks.producer.send.resolves(result);
+			mocks.kafka.Producer.prototype.send.resolves(result);
 
 			// when
 
@@ -120,7 +118,7 @@ describe('index/publish.js', () => {
 					// then
 
 					calledOnce(mocks.kafka.Producer.prototype.init);
-					calledTwice(mocks.producer.send);
+					calledTwice(mocks.kafka.Producer.prototype.send);
 
 				});
 
@@ -173,7 +171,7 @@ describe('index/publish.js', () => {
 					// then
 
 					calledOnce(mocks.kafka.Producer.prototype.init);
-					notCalled(mocks.producer.send);
+					notCalled(mocks.kafka.Producer.prototype.send);
 
 				});
 
@@ -190,7 +188,7 @@ describe('index/publish.js', () => {
 					config: {}
 				};
 
-			mocks.producer.send.rejects(new Error('Send error'));
+			mocks.kafka.Producer.prototype.send.rejects(new Error('Send error'));
 
 			// when
 
@@ -200,8 +198,8 @@ describe('index/publish.js', () => {
 					// then
 
 					calledOnce(mocks.kafka.Producer.prototype.init);
-					calledOnce(mocks.producer.send);
-					calledWith(mocks.producer.send, {
+					calledOnce(mocks.kafka.Producer.prototype.send);
+					calledWith(mocks.kafka.Producer.prototype.send, {
 						topic: input.eventName,
 						message: {
 							value: input.buffer
