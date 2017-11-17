@@ -28,7 +28,11 @@
 
 const
 
-	EARLIEST_OFFSET = -2,
+	FIRST_INVOCATION = 0,
+	FIRST_ARGUMENT = 0,
+	FIRST_STRATEGY = 0,
+
+	Kafka = require('no-kafka'),
 
 	sinon = require('sinon'),
 	proxyquire = require('proxyquire'),
@@ -50,7 +54,7 @@ describe('index/subscribe.js', () => {
 
 	describe('subscribe', () => {
 
-		let subscribe, mocks;
+		let subscribe, mocks, handler, config, topic;
 
 		beforeEach(() => {
 
@@ -64,36 +68,37 @@ describe('index/subscribe.js', () => {
 			subscribe = proxyquire('../../lib/index/subscribe', {
 				'no-kafka': mocks.kafka
 			});
+
+			handler = sandbox.stub();
+
+			config = {};
+			topic = 'test';
 		});
 
 		afterEach(restore);
 
 		it('creates a consumer and initialises it', () => {
 
-			// given
+			// given 
 
-			const
-				handler = sandbox.stub(),
-				config = {
-					connectionString: 'server.com:9092'
-				};
+			config = {
+				connectionString: 'server.com:9092'
+			};
 
-			// when
+			// when - then
 
-			return expect(subscribe.subscribe({ eventName: 'test', handler, config })).to.be.fulfilled
+			return expect(subscribe.subscribe({ eventName: topic, handler, config })).to.be.fulfilled
 				.then(() => {
-
-					// then
 
 					calledOnce(mocks.kafka.GroupConsumer);
 					calledWith(mocks.kafka.GroupConsumer, {
 						connectionString: 'server.com:9092',
-						groupId: 'test',
-						startingOffset: EARLIEST_OFFSET
+						groupId: topic,
+						startingOffset: Kafka.EARLIEST_OFFSET
 					});
 					calledOnce(mocks.kafka.GroupConsumer.prototype.init);
 					calledWith(mocks.kafka.GroupConsumer.prototype.init, [{
-						subscriptions: ['test'],
+						subscriptions: [topic],
 						handler: anyFunction
 					}]);
 
@@ -104,10 +109,6 @@ describe('index/subscribe.js', () => {
 		it('rejects if GroupConsumer constructor throws an error', () => {
 
 			// given
-
-			const
-				handler = sandbox.stub(),
-				config = {};
 
 			mocks.kafka.GroupConsumer.throws(new Error('Constructor error'));
 
@@ -122,10 +123,6 @@ describe('index/subscribe.js', () => {
 
 			// given
 
-			const
-				handler = sandbox.stub(),
-				config = {};
-
 			mocks.kafka.GroupConsumer.prototype.init.throws(new Error('Init error'));
 
 			// when - then
@@ -139,13 +136,11 @@ describe('index/subscribe.js', () => {
 
 			// given
 
-			const
-				handler = {},
-				config = {};
+			handler = {};
 
 			// when - then
 
-			return expect(subscribe.subscribe({ eventName: 'test', handler, config }))
+			return expect(subscribe.subscribe({ eventName: topic, handler, config }))
 				.to.be.rejectedWith('Handler is not a Function.');
 
 		});
@@ -154,7 +149,8 @@ describe('index/subscribe.js', () => {
 
 	describe('handler', () => {
 
-		let subscribe, mocks;
+		let subscribe, mocks, getHandlerRegisteredWithKafka,
+			messageSet, topic, partition, config, handler;
 
 		beforeEach(() => {
 
@@ -169,6 +165,22 @@ describe('index/subscribe.js', () => {
 			subscribe = proxyquire('../../lib/index/subscribe', {
 				'no-kafka': mocks.kafka
 			});
+
+			getHandlerRegisteredWithKafka = () => {
+				return mocks.kafka.GroupConsumer.prototype.init
+					.args[FIRST_INVOCATION][FIRST_ARGUMENT][FIRST_STRATEGY].handler;
+			};
+
+			messageSet = [{
+				offset: 99,
+				message: {
+					value: Buffer.from('Test')
+				}
+			}];
+			topic = 'test';
+			partition = 0;
+			config = {};
+
 		});
 
 		afterEach(restore);
@@ -177,29 +189,16 @@ describe('index/subscribe.js', () => {
 
 			// given
 
-			const
-				handler = sandbox.stub().resolves(),
-				config = {};
+			handler = sandbox.stub().resolves();
 
 			// when
 
-			return expect(subscribe.subscribe({ eventName: 'test', handler, config })).to.be.fulfilled
+			return subscribe.subscribe({ eventName: topic, handler, config })
 				.then(() => {
 
-					// then
+					// when - then
 
-					const
-						initArgs = mocks.kafka.GroupConsumer.prototype.init.args[0][0][0],
-						messageSet = [{
-							offset: 99,
-							message: {
-								value: Buffer.from('Test')
-							}
-						}],
-						topic = 'test',
-						partition = 0;
-
-					return expect(initArgs.handler(messageSet, topic, partition)).to.be.fulfilled
+					return expect(getHandlerRegisteredWithKafka()(messageSet, topic, partition)).to.be.fulfilled
 						.then(() => {
 
 							calledOnce(handler);
@@ -222,29 +221,14 @@ describe('index/subscribe.js', () => {
 
 			// given
 
-			const
-				handler = sandbox.stub().throws(new Error('Handler error')),
-				config = {};
+			handler = sandbox.stub().throws(new Error('Handler error'));
 
-			// when
-
-			return expect(subscribe.subscribe({ eventName: 'test', handler, config })).to.be.fulfilled
+			return subscribe.subscribe({ eventName: topic, handler, config })
 				.then(() => {
 
-					// then
+					// when - then
 
-					const
-						initArgs = mocks.kafka.GroupConsumer.prototype.init.args[0][0][0],
-						messageSet = [{
-							offset: 99,
-							message: {
-								value: Buffer.from('Test')
-							}
-						}],
-						topic = 'test',
-						partition = 0;
-
-					return expect(initArgs.handler(messageSet, topic, partition)).to.be.rejectedWith('Handler error')
+					return expect(getHandlerRegisteredWithKafka()(messageSet, topic, partition)).to.be.rejectedWith('Handler error')
 						.then(() => {
 
 							calledOnce(handler);
@@ -262,29 +246,14 @@ describe('index/subscribe.js', () => {
 
 			// given
 
-			const
-				handler = sandbox.stub().rejects(new Error('Handler error')),
-				config = {};
+			handler = sandbox.stub().rejects(new Error('Handler error'));
 
-			// when
-
-			return expect(subscribe.subscribe({ eventName: 'test', handler, config })).to.be.fulfilled
+			return subscribe.subscribe({ eventName: topic, handler, config })
 				.then(() => {
 
-					// then
+					// when - then
 
-					const
-						initArgs = mocks.kafka.GroupConsumer.prototype.init.args[0][0][0],
-						messageSet = [{
-							offset: 99,
-							message: {
-								value: Buffer.from('Test')
-							}
-						}],
-						topic = 'test',
-						partition = 0;
-
-					return expect(initArgs.handler(messageSet, topic, partition)).to.be.rejectedWith('Handler error')
+					return expect(getHandlerRegisteredWithKafka()(messageSet, topic, partition)).to.be.rejectedWith('Handler error')
 						.then(() => {
 
 							calledOnce(handler);
@@ -302,31 +271,15 @@ describe('index/subscribe.js', () => {
 
 			// given
 
-			const
-				handler = sandbox.stub().resolves(),
-				config = {};
-
-			// when
-
+			handler = sandbox.stub().resolves();
 			mocks.kafka.GroupConsumer.prototype.commitOffset.rejects(new Error('Can\'t commit'));
 
-			return expect(subscribe.subscribe({ eventName: 'test', handler, config })).to.be.fulfilled
+			return expect(subscribe.subscribe({ eventName: topic, handler, config })).to.be.fulfilled
 				.then(() => {
 
-					// then
+					// when - then
 
-					const
-						initArgs = mocks.kafka.GroupConsumer.prototype.init.args[0][0][0],
-						messageSet = [{
-							offset: 99,
-							message: {
-								value: Buffer.from('Test')
-							}
-						}],
-						topic = 'test',
-						partition = 0;
-
-					return expect(initArgs.handler(messageSet, topic, partition))
+					return expect(getHandlerRegisteredWithKafka()(messageSet, topic, partition))
 						.to.be.rejectedWith('Can\'t commit');
 
 				});
