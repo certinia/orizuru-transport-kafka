@@ -27,7 +27,14 @@
 'use strict';
 
 const
+	_ = require('lodash'),
 	Kafka = require('no-kafka'),
+
+	validateHandler = (handler) => () => {
+		if (!_.isFunction(handler)) {
+			throw new Error('Handler is not a Function.');
+		}
+	},
 
 	handlerWrapper = (handler, consumer) => (messageSet, topic, partition) => {
 		return messageSet.reduce((chain, record) => {
@@ -41,7 +48,7 @@ const
 		}, Promise.resolve());
 	},
 
-	createConsumer = ({ eventName, config }) => {
+	createConsumer = (eventName, config) => () => {
 		return new Kafka.GroupConsumer(Object.assign({
 			groupId: eventName,
 			startingOffset: Kafka.EARLIEST_OFFSET
@@ -59,8 +66,9 @@ module.exports = {
 
 	subscribe: ({ eventName, handler, config }) => {
 
-		return Promise.resolve({ eventName, config })
-			.then(createConsumer)
+		return Promise.resolve()
+			.then(validateHandler(handler))
+			.then(createConsumer(eventName, config))
 			.then(initialiseConsumer(eventName, handler));
 
 	}

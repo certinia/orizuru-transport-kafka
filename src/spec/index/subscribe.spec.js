@@ -111,7 +111,7 @@ describe('index/subscribe.js', () => {
 
 			mocks.kafka.GroupConsumer.throws(new Error('Constructor error'));
 
-			// when
+			// when - then
 
 			return expect(subscribe.subscribe({ eventName: 'test', handler, config }))
 				.to.be.rejectedWith('Constructor error');
@@ -128,10 +128,25 @@ describe('index/subscribe.js', () => {
 
 			mocks.kafka.GroupConsumer.prototype.init.throws(new Error('Init error'));
 
-			// when
+			// when - then
 
 			return expect(subscribe.subscribe({ eventName: 'test', handler, config }))
 				.to.be.rejectedWith('Init error');
+
+		});
+
+		it('rejects if handler is not a function', () => {
+
+			// given
+
+			const
+				handler = {},
+				config = {};
+
+			// when - then
+
+			return expect(subscribe.subscribe({ eventName: 'test', handler, config }))
+				.to.be.rejectedWith('Handler is not a Function.');
 
 		});
 
