@@ -26,8 +26,43 @@
 
 'use strict';
 
+const
+	Kafka = require('no-kafka'),
+
+	handlerWrapper = (handler, consumer) => ({ messageSet, topic, partition }) => {
+		return messageSet.reduce((chain, record) => {
+			return chain
+				.then(() => handler(record.message.value))
+				.then(() => consumer.commitOffset({
+					topic: topic,
+					partition: partition,
+					offset: record.offset
+				}));
+		}, Promise.resolve());
+	},
+
+	createConsumer = ({ eventName, config }) => {
+		return new Kafka.GroupConsumer(Object.assign({
+			groupId: eventName,
+			startingOffset: Kafka.EARLIEST_OFFSET
+		}, config));
+	},
+
+	initialiseConsumer = (eventName, handler) => (consumer) => {
+		return consumer.init([{
+			subscriptions: [eventName],
+			handler: handlerWrapper(handler, consumer)
+		}]);
+	};
+
 module.exports = {
 
-	subscribe: () => {}
+	subscribe: ({ eventName, handler, config }) => {
+
+		return Promise.resolve({ eventName, config })
+			.then(createConsumer)
+			.then(initialiseConsumer(eventName, handler));
+
+	}
 
 };
