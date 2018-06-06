@@ -24,20 +24,20 @@
   "author": "financialforce",
   "license": "BSD-3-Clause",
   "dependencies": {
-    "lodash": "4.17.4",
-    "no-kafka": "3.2.8"
+    "lodash": "^4.17.10",
+    "no-kafka": "^3.2.10"
   },
   "devDependencies": {
-    "@financialforcedev/eslint-config": "^3.0.1",
-    "app-root-path": "2.0.1",
-    "chai": "4.1.2",
-    "chai-as-promised": "7.1.1",
-    "jsdoc": "3.5.5",
-    "mocha": "4.0.1",
-    "nyc": "11.3.0",
-    "proxyquire": "1.8.0",
-    "sinon": "4.1.2",
-    "sinon-chai": "2.14.0"
+    "@financialforcedev/eslint-config": "^4.0.0",
+    "app-root-path": "^2.0.1",
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
+    "jsdoc": "^3.5.5",
+    "mocha": "^5.2.0",
+    "nyc": "^12.0.2",
+    "proxyquire": "^2.0.1",
+    "sinon": "^5.1.0",
+    "sinon-chai": "^3.1.0"
   },
   "nyc": {
     "check-coverage": true,
